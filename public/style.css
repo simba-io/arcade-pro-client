@@ -13,3 +13,25 @@ body {
     justify-content: center;
     align-items: center;
 }
+
+#pixi-container {
+  width: 600px;
+  height: 400px;
+  margin: 0 auto;
+  background: #1099bb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+@media (max-width: 700px) {
+  #pixi-container {
+    width: 95vw;
+    height: 50vw;
+    min-height: 200px;
+    min-width: 200px;
+  }
+}

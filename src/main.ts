@@ -1,35 +1,28 @@
-import { Application, Assets, Sprite } from "pixi.js";
+import { createBunnyCanvas } from "./BunnyCanvas";
+import { createBunnyCanvas as createOtherCanvas } from "./OtherCanvas";
+import { createMenuCanvas } from "./MenuCanvas";
 
 (async () => {
-  // Create a new application
-  const app = new Application();
+  // Create and mount the menu canvas (left side)
+  const menuContainer = document.createElement("div");
+  menuContainer.id = "menu-canvas-container";
+  document.body.appendChild(menuContainer);
+  await createMenuCanvas(menuContainer);
 
-  // Initialize the application
-  await app.init({ background: "#1099bb", resizeTo: window });
+  // Main bunny canvas
+  const container = document.getElementById("pixi-container");
+  if (container) {
+    await createBunnyCanvas(container);
+  }
 
-  // Append the application canvas to the document body
-  document.getElementById("pixi-container")!.appendChild(app.canvas);
-
-  // Load the bunny texture
-  const texture = await Assets.load("/assets/bunny.png");
-
-  // Create a bunny Sprite
-  const bunny = new Sprite(texture);
-
-  // Center the sprite's anchor point
-  bunny.anchor.set(0.5);
-
-  // Move the sprite to the center of the screen
-  bunny.position.set(app.screen.width / 2, app.screen.height / 2);
-
-  // Add the bunny to the stage
-  app.stage.addChild(bunny);
-
-  // Listen for animate update
-  app.ticker.add((time) => {
-    // Just for fun, let's rotate mr rabbit a little.
-    // * Delta is 1 if running at 100% performance *
-    // * Creates frame-independent transformation *
-    bunny.rotation += 0.1 * time.deltaTime;
-  });
+  // Add another canvas below the first one
+  const otherContainer = document.createElement("div");
+  otherContainer.style.marginTop = "2rem";
+  otherContainer.style.width = container ? container.style.width : "600px";
+  otherContainer.style.height = container ? container.style.height : "400px";
+  otherContainer.id = "other-pixi-container";
+  if (container && container.parentElement) {
+    container.parentElement.appendChild(otherContainer);
+    await createOtherCanvas(otherContainer);
+  }
 })();
