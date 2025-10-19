@@ -1,14 +1,14 @@
 // BunnyCanvas.ts
 import { Application, Assets, Sprite } from "pixi.js";
 
-export const BUNNY_CANVAS_ID = "pixi-container";
+export const ANOTHER_CANVAS_ID = "another-pixi-container";
 
 export async function createBunnyCanvas(container: HTMLElement) {
   // Create a new application
   const app = new Application();
 
   // Initialize the application
-  await app.init({ background: "#1099bb", resizeTo: window });
+  await app.init({ background: "#43a047", resizeTo: window });
 
   // Set the canvas size to match the container
   app.renderer.resize(container.clientWidth, container.clientHeight);

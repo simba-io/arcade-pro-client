@@ -1,6 +1,8 @@
 // BunnyCanvas.ts
 import { Application, Assets, Sprite } from "pixi.js";
 
+export const OTHER_CANVAS_ID = "other-pixi-container";
+
 export async function createBunnyCanvas(container: HTMLElement) {
   // Create a new application
   const app = new Application();
