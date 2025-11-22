@@ -15,7 +15,8 @@ export interface ViewContentProvider {
 export const CANVAS_STYLES = {
   width: "100%",
   height: "100%",
-  marginTop: "2rem",
+  marginTop: "0",
+  marginBottom: "0"
 } as const;
 
 export async function createStandardCanvas(
@@ -86,9 +87,13 @@ export function createCanvasContainer(
   containerId: string,
 ): HTMLElement {
   const container = document.createElement("div");
-  container.style.marginTop = CANVAS_STYLES.marginTop;
-  container.style.width = CANVAS_STYLES.width;
-  container.style.height = CANVAS_STYLES.height;
+  container.style.margin = "0";
+  container.style.padding = "0";
+  container.style.border = "0";
+  container.style.width = "100vw";
+  container.style.height = "100vh";
+  container.style.display = "block";
+  container.style.overflow = "hidden";
   container.id = containerId;
   parentElement.appendChild(container);
   return container;

@@ -53,7 +53,7 @@ class SplashContentProvider implements ViewContentProvider {
 export async function createSplashView(container: HTMLElement) {
   const config: CanvasConfig = {
     backgroundColor: "#1099bb",
-    containerId: SPLASH_VIEW_ID,
+    containerId: SPLASH_VIEW_ID
   };
 
   const contentProvider = new SplashContentProvider();
