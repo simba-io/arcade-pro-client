@@ -1,12 +1,13 @@
-import { createBunnyCanvas, BUNNY_CANVAS_ID } from "./BunnyCanvas";
-import { createBunnyCanvas as createOtherCanvas, OTHER_CANVAS_ID } from "./OtherCanvas";
+import { createSplashView, SPLASH_VIEW_ID } from "./SplashView";
+import { createBioView, BIO_VIEW_ID } from "./BioView";
 import { createMenuCanvas, MENU_CANVAS_ID } from "./MenuCanvas";
-import { createBunnyCanvas as createAnotherCanvas, ANOTHER_CANVAS_ID } from "./AnotherCanvas";
+import { createContactView, CONTACT_VIEW_ID } from "./ContactView";
+import { createCanvasContainer } from "./CanvasUtils";
 
 const components = [
-  { label: "Bunny", id: BUNNY_CANVAS_ID },
-  { label: "Other", id: OTHER_CANVAS_ID },
-  { label: "Another", id: ANOTHER_CANVAS_ID }
+  { label: "Splash", id: SPLASH_VIEW_ID },
+  { label: "Bio", id: BIO_VIEW_ID },
+  { label: "Contact", id: CONTACT_VIEW_ID }
 ];
 
 (async () => {
@@ -16,31 +17,21 @@ const components = [
   document.body.appendChild(menuContainer);
   await createMenuCanvas(menuContainer, components);
 
-  // Main bunny canvas
-  const container = document.getElementById(BUNNY_CANVAS_ID);
-  if (container) {
-    await createBunnyCanvas(container);
-  }
+  // Create all canvases using standardized container creation
+  const mainContainer = document.body;
 
-  // Add another canvas below the first one
-  const otherContainer = document.createElement("div");
-  otherContainer.style.marginTop = "2rem";
-  otherContainer.style.width = container ? container.style.width : "600px";
-  otherContainer.style.height = container ? container.style.height : "400px";
-  otherContainer.id = OTHER_CANVAS_ID;
-  if (container && container.parentElement) {
-    container.parentElement.appendChild(otherContainer);
-    await createOtherCanvas(otherContainer);
-  }
+  // Create splash view with standardized styling
+  const splashContainer = createCanvasContainer(mainContainer, SPLASH_VIEW_ID);
+  await createSplashView(splashContainer);
 
-  // Add the third canvas below the second one
-  const anotherContainer = document.createElement("div");
-  anotherContainer.style.marginTop = "2rem";
-  anotherContainer.style.width = container ? container.style.width : "600px";
-  anotherContainer.style.height = container ? container.style.height : "400px";
-  anotherContainer.id = ANOTHER_CANVAS_ID;
-  if (otherContainer && otherContainer.parentElement) {
-    otherContainer.parentElement.appendChild(anotherContainer);
-    await createAnotherCanvas(anotherContainer);
-  }
+  // Create bio view with standardized styling
+  const bioContainer = createCanvasContainer(mainContainer, BIO_VIEW_ID);
+  await createBioView(bioContainer);
+
+  // Create contact view with standardized styling
+  const contactContainer = createCanvasContainer(
+    mainContainer,
+    CONTACT_VIEW_ID,
+  );
+  await createContactView(contactContainer);
 })();
