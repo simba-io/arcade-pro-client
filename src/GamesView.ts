@@ -1,4 +1,4 @@
-// BioView.ts
+// GamesView.ts
 import { Application, Graphics, Text } from "pixi.js";
 import { 
   createCustomCanvas, 
@@ -6,9 +6,9 @@ import {
   ViewContentProvider 
 } from "./CanvasUtils";
 
-export const BIO_VIEW_ID = "bio-view-container";
+export const GAMES_VIEW_ID = "games-view-container";
 
-class BioContentProvider implements ViewContentProvider {
+class GamesContentProvider implements ViewContentProvider {
   async setupContent(app: Application): Promise<void> {
     // Create a profile card background
     const cardBg = new Graphics();
@@ -23,8 +23,8 @@ class BioContentProvider implements ViewContentProvider {
     cardBg.endFill();
     app.stage.addChild(cardBg);
 
-    // Add bio title
-    const bioTitle = new Text({
+    // Add games title
+    const gamesTitle = new Text({
       text: "About Me",
       style: {
         fill: "#ffffff",
@@ -33,12 +33,12 @@ class BioContentProvider implements ViewContentProvider {
         fontWeight: "bold",
       },
     });
-    bioTitle.anchor.set(0.5);
-    bioTitle.position.set(app.screen.width / 2, app.screen.height / 2 - 100);
-    app.stage.addChild(bioTitle);
+    gamesTitle.anchor.set(0.5);
+    gamesTitle.position.set(app.screen.width / 2, app.screen.height / 2 - 100);
+    app.stage.addChild(gamesTitle);
 
-    // Add bio content
-    const bioContent = new Text({
+    // Add games content
+    const gamesContent = new Text({
       text: "I'm a passionate developer\nwith expertise in web technologies.\n\nI love creating innovative solutions\nand building amazing experiences.",
       style: {
         fill: "#ffffff",
@@ -48,9 +48,9 @@ class BioContentProvider implements ViewContentProvider {
         lineHeight: 28,
       },
     });
-    bioContent.anchor.set(0.5);
-    bioContent.position.set(app.screen.width / 2, app.screen.height / 2 + 20);
-    app.stage.addChild(bioContent);
+    gamesContent.anchor.set(0.5);
+    gamesContent.position.set(app.screen.width / 2, app.screen.height / 2 + 20);
+    app.stage.addChild(gamesContent);
 
     // Add subtle animation to the card
     let cardOffset = 0;
@@ -61,12 +61,12 @@ class BioContentProvider implements ViewContentProvider {
   }
 }
 
-export async function createBioView(container: HTMLElement) {
+export async function createGamesView(container: HTMLElement) {
   const config: CanvasConfig = {
     backgroundColor: "#c62828",
-    containerId: BIO_VIEW_ID,
+    containerId: GAMES_VIEW_ID,
   };
 
-  const contentProvider = new BioContentProvider();
+  const contentProvider = new GamesContentProvider();
   return await createCustomCanvas(container, config, contentProvider);
 }

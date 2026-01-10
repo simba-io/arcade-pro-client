@@ -1,4 +1,4 @@
-// ContactView.ts
+// DashboardView.ts
 import { Application, Graphics, Text } from "pixi.js";
 import { 
   createCustomCanvas, 
@@ -6,11 +6,11 @@ import {
   ViewContentProvider 
 } from "./CanvasUtils";
 
-export const CONTACT_VIEW_ID = "contact-view-container";
+export const DASHBOARD_VIEW_ID = "dashboard-view-container";
 
-class ContactContentProvider implements ViewContentProvider {
+class DashboardContentProvider implements ViewContentProvider {
   async setupContent(app: Application): Promise<void> {
-    // Create contact form background
+    // Create dashboard form background
     const formBg = new Graphics();
     formBg.beginFill(0x2e7d32, 0.9);
     formBg.drawRoundedRect(
@@ -23,8 +23,8 @@ class ContactContentProvider implements ViewContentProvider {
     formBg.endFill();
     app.stage.addChild(formBg);
 
-    // Add contact title
-    const contactTitle = new Text({
+    // Add dashboard title
+    const dashboardTitle = new Text({
       text: "Get In Touch",
       style: {
         fill: "#ffffff",
@@ -33,12 +33,12 @@ class ContactContentProvider implements ViewContentProvider {
         fontWeight: "bold",
       },
     });
-    contactTitle.anchor.set(0.5);
-    contactTitle.position.set(app.screen.width / 2, app.screen.height / 2 - 100);
-    app.stage.addChild(contactTitle);
+    dashboardTitle.anchor.set(0.5);
+    dashboardTitle.position.set(app.screen.width / 2, app.screen.height / 2 - 100);
+    app.stage.addChild(dashboardTitle);
 
-    // Add contact information
-    const contactInfo = new Text({
+    // Add dashboard information
+    const dashboardInfo = new Text({
       text: "📧 email@example.com\n📞 +1 (555) 123-4567\n🌐 www.mywebsite.com\n📍 123 Main St, City, State",
       style: {
         fill: "#ffffff",
@@ -48,9 +48,9 @@ class ContactContentProvider implements ViewContentProvider {
         lineHeight: 35,
       },
     });
-    contactInfo.anchor.set(0.5);
-    contactInfo.position.set(app.screen.width / 2, app.screen.height / 2 + 20);
-    app.stage.addChild(contactInfo);
+    dashboardInfo.anchor.set(0.5);
+    dashboardInfo.position.set(app.screen.width / 2, app.screen.height / 2 + 20);
+    app.stage.addChild(dashboardInfo);
 
     // Add animated border effect
     const borderGraphics = new Graphics();
@@ -81,12 +81,12 @@ class ContactContentProvider implements ViewContentProvider {
   }
 }
 
-export async function createContactView(container: HTMLElement) {
+export async function createDashboardView(container: HTMLElement) {
   const config: CanvasConfig = {
     backgroundColor: "#43a047",
-    containerId: CONTACT_VIEW_ID,
+    containerId: DASHBOARD_VIEW_ID,
   };
 
-  const contentProvider = new ContactContentProvider();
+  const contentProvider = new DashboardContentProvider();
   return await createCustomCanvas(container, config, contentProvider);
 }

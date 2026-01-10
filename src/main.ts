@@ -1,14 +1,14 @@
 import { createSplashView, SPLASH_VIEW_ID } from "./SplashView";
-import { createBioView, BIO_VIEW_ID } from "./BioView";
 import { createMenuCanvas, MENU_CANVAS_ID } from "./MenuCanvas";
-import { createContactView, CONTACT_VIEW_ID } from "./ContactView";
 import { createCanvasContainer } from "./CanvasUtils";
 import { createUserPanelCanvas, USER_PANEL_CANVAS_ID } from "./UserPanelCanvas";
+import { DASHBOARD_VIEW_ID, createDashboardView } from "./DashboardView";
+import { GAMES_VIEW_ID, createGamesView } from "./GamesView";
 
 const components = [
   { label: "Splash", id: SPLASH_VIEW_ID },
-  { label: "Bio", id: BIO_VIEW_ID },
-  { label: "Contact", id: CONTACT_VIEW_ID }
+  { label: "Games", id: GAMES_VIEW_ID },
+  { label: "Dashboard", id: DASHBOARD_VIEW_ID }
 ];
 
 // View manager to handle navigation between pages
@@ -51,18 +51,18 @@ function showView(viewId: string) {
   await createSplashView(splashContainer);
   viewContainers.set(SPLASH_VIEW_ID, splashContainer);
 
-  // Create bio view with standardized styling
-  const bioContainer = createCanvasContainer(mainContainer, BIO_VIEW_ID);
-  await createBioView(bioContainer);
-  viewContainers.set(BIO_VIEW_ID, bioContainer);
+  // Create games view with standardized styling
+  const gamesContainer = createCanvasContainer(mainContainer, GAMES_VIEW_ID);
+  await createGamesView(gamesContainer);
+  viewContainers.set(GAMES_VIEW_ID, gamesContainer);
 
-  // Create contact view with standardized styling
-  const contactContainer = createCanvasContainer(
+  // Create dashboard view with standardized styling
+  const dashboardContainer = createCanvasContainer(
     mainContainer,
-    CONTACT_VIEW_ID,
+    DASHBOARD_VIEW_ID,
   );
-  await createContactView(contactContainer);
-  viewContainers.set(CONTACT_VIEW_ID, contactContainer);
+  await createDashboardView(dashboardContainer);
+  viewContainers.set(DASHBOARD_VIEW_ID, dashboardContainer);
 
   // Show initial view
   showView(SPLASH_VIEW_ID);
