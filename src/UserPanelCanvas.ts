@@ -272,10 +272,23 @@ export async function createUserPanelCanvas(
         if (!userId) throw new Error("Registration successful but no user ID returned");
 
         // If Supabase returned a session immediately we can create UserData now.
-        // Otherwise the user must confirm their email / sign in — we'll create the UserData
-        // inside the auth-state listener once a session exists (to satisfy RLS).
+        // Otherwise try to sign in immediately (some Supabase configs still return no session until
+        // email confirmation). If sign-in succeeds we'll create the UserData; otherwise the
+        // auth-state listener will create it after the user confirms/signs in.
         if (regData.session) {
           await createUserData(userId, emailVal);
+        } else {
+          try {
+            // attempt immediate sign-in
+            await signInWithEmail(emailVal, p1);
+            const current = await getCurrentUser();
+            if (current?.id) {
+              await createUserData(current.id, emailVal);
+            }
+          } catch (e) {
+            // sign-in failed (likely requires email confirm). Let auth listener handle creation.
+            console.warn("Automatic sign-in after registration failed:", e);
+          }
         }
 
         // Update displayed fields
@@ -475,7 +488,8 @@ export async function createUserPanelCanvas(
 
   // Listen for auth state changes and sync UI
   let unsubscribe: (() => void) | undefined;
-  onAuthStateChange(async (session) => {
+  unsubscribe = onAuthStateChange(async (session) => {
+    console.log("onAuthStateChange session:", session);
     if (session?.user) {
       isSignedIn = true;
       const displayName = session.user.user_metadata?.name || session.user.email?.split("@")[0] || "Player";
@@ -485,9 +499,11 @@ export async function createUserPanelCanvas(
       // Fetch user data from database; if none exists create it (RLS requires auth.uid())
       try {
         const userData = await fetchUserData(session.user.id);
+        console.log("fetched userData in listener:", userData);
         if (!userData) {
           // create new UserData record for this authenticated user
-          await createUserData(session.user.id, session.user.email || session.user.id);
+          const created = await createUserData(session.user.id, session.user.email || session.user.id);
+          console.log("created userData in listener:", created);
           walletBalanceField.text = `Wallet: $0.00`;
           winsField.text = `Wins: 0`;
           lossesField.text = `Losses: 0`;

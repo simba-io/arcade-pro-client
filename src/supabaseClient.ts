@@ -83,13 +83,16 @@ export function onAuthStateChange(callback: (session: any) => void) {
  * Create a new UserData record in the UserData table
  */
 export async function createUserData(userId: string, email: string) {
-  const userData = new UserData(email, 0, 0, 0, 0);
   const { data, error } = await supabase
     .from("UserData")
-    .insert([{ user: userId, email: email, wins: 0, losses: 0, pushes: 0, wallet: 0 }])
+    .insert([{ userName: userId, email: email, wins: 0, losses: 0, pushes: 0, wallet: 0 }])
     .select();
-  if (error) throw new Error(error.message);
-  return data;
+  if (error) {
+    console.error("createUserData error:", error);
+    throw new Error(error.message);
+  }
+  // return single inserted row if present
+  return Array.isArray(data) ? data[0] : data;
 }
 
 /**
@@ -99,9 +102,17 @@ export async function fetchUserData(userId: string) {
   const { data, error } = await supabase
     .from("UserData")
     .select("*")
-    .eq("user", userId)
+    .eq("userName", userId)
     .single();
-  if (error && error.code !== "PGRST116") throw new Error(error.message); // PGRST116 = no rows found
+  if (error) {
+    // If no rows, PostgREST may return 406 or specific code — return null in that case
+    const code = (error as any)?.code || (error as any)?.status;
+    if (code === "PGRST116" || code === 406) {
+      return null;
+    }
+    console.error("fetchUserData error:", error);
+    throw new Error(error.message);
+  }
   return data;
 }
 
@@ -112,7 +123,7 @@ export async function updateUserData(userId: string, updates: Partial<UserData>)
   const { data, error } = await supabase
     .from("UserData")
     .update(updates)
-    .eq("user", userId)
+    .eq("userName", userId)
     .select();
   if (error) throw new Error(error.message);
   return data;
