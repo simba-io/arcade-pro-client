@@ -5,7 +5,6 @@ export const MENU_CANVAS_ID = "menu-canvas-container";
 export async function createMenuCanvas(
   container: HTMLElement,
   components: Array<{ label: string; id: string }>,
-  onNavigate?: (viewId: string) => void,
 ) {  // Create a new application for the menu
   const app = new Application();
   await app.init({
@@ -33,9 +32,10 @@ export async function createMenuCanvas(
     button.on("pointerover", () => (button.tint = 0x607d8b));
     button.on("pointerout", () => (button.tint = 0xffffff));
     button.on("pointertap", () => {
-      // Navigate to the corresponding view
-      if (onNavigate) {
-        onNavigate(option.id);
+      // Scroll to the corresponding component
+      const target = document.getElementById(option.id);
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth", block: "center" });
       }
     });
     // Add text
