@@ -1,12 +1,12 @@
 export class UserData {
-  user: string;
+  userName: string;
   wins: number;
   losses: number;
   pushes: number;
   wallet: number;
 
   constructor(user: string, wins: number = 0, losses: number = 0, pushes: number = 0, wallet: number = 0) {
-    this.user = user;
+    this.userName = user;
     this.wins = wins;
     this.losses = losses;
     this.pushes = pushes;
@@ -15,7 +15,7 @@ export class UserData {
 
   toJSON() {
     return {
-      user: this.user,
+      user: this.userName,
       wins: this.wins,
       losses: this.losses,
       pushes: this.pushes,
