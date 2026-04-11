@@ -16,7 +16,7 @@ export const CANVAS_STYLES = {
   width: "100%",
   height: "100%",
   marginTop: "0",
-  marginBottom: "0"
+  marginBottom: "0",
 } as const;
 
 export async function createStandardCanvas(

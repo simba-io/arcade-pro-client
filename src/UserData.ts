@@ -1,25 +1,17 @@
-export class UserData {
+export interface UserDataProps {
+  email: string;
+  uuid: string;
   userName: string;
   wins: number;
   losses: number;
   pushes: number;
   wallet: number;
+}
 
-  constructor(user: string, wins: number = 0, losses: number = 0, pushes: number = 0, wallet: number = 0) {
-    this.userName = user;
-    this.wins = wins;
-    this.losses = losses;
-    this.pushes = pushes;
-    this.wallet = wallet;
-  }
+export class UserData {
+  data: UserDataProps;
 
-  toJSON() {
-    return {
-      user: this.userName,
-      wins: this.wins,
-      losses: this.losses,
-      pushes: this.pushes,
-      wallet: this.wallet,
-    };
+  constructor(_data: UserDataProps) {
+    this.data = _data;
   }
 }

@@ -1,14 +1,14 @@
 import { createSplashView, SPLASH_VIEW_ID } from "./SplashView";
 import { createMenuCanvas, MENU_CANVAS_ID } from "./MenuCanvas";
 import { createCanvasContainer } from "./CanvasUtils";
-import { createUserPanelCanvas, USER_PANEL_CANVAS_ID } from "./UserPanelCanvas";
+//import { createUserPanelCanvas, USER_PANEL_CANVAS_ID } from "./UserPanelCanvas";
 import { DASHBOARD_VIEW_ID, createDashboardView } from "./DashboardView";
 import { GAMES_VIEW_ID, createGamesView } from "./GamesView";
 
 const components = [
   { label: "Splash", id: SPLASH_VIEW_ID },
   { label: "Games", id: GAMES_VIEW_ID },
-  { label: "Dashboard", id: DASHBOARD_VIEW_ID }
+  { label: "Dashboard", id: DASHBOARD_VIEW_ID },
 ];
 
 // View manager to handle navigation between pages
@@ -36,12 +36,6 @@ function showView(viewId: string) {
   menuContainer.id = MENU_CANVAS_ID;
   document.body.appendChild(menuContainer);
   await createMenuCanvas(menuContainer, components, showView);
-
-  // Create and mount the user panel canvas (right side)
-  const userPanelContainer = document.createElement("div");
-  userPanelContainer.id = USER_PANEL_CANVAS_ID;
-  document.body.appendChild(userPanelContainer);
-  await createUserPanelCanvas(userPanelContainer);
 
   // Create all canvases using standardized container creation
   const mainContainer = document.body;
