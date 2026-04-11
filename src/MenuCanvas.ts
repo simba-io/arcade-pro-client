@@ -6,7 +6,8 @@ export async function createMenuCanvas(
   container: HTMLElement,
   components: Array<{ label: string; id: string }>,
   onNavigate?: (viewId: string) => void,
-) {  // Create a new application for the menu
+) {
+  // Create a new application for the menu
   const app = new Application();
   await app.init({
     background: "#263238",
@@ -21,7 +22,7 @@ export async function createMenuCanvas(
   app.view.style.width = "150px";
   app.view.style.zIndex = "1000";
   app.view.style.transition = "transform 220ms ease";
-  container.appendChild(app.view as HTMLCanvasElement);  // Create menu options based on passed components
+  container.appendChild(app.view as HTMLCanvasElement); // Create menu options based on passed components
   components.forEach((option, i) => {
     const button = new Graphics();
     button.beginFill(0x37474f);
@@ -81,7 +82,8 @@ export async function createMenuCanvas(
     visible = !visible;
     if (visible) {
       (app.view as HTMLCanvasElement).style.transform = "translateX(0)";
-      toggle.innerText = "×";    } else {
+      toggle.innerText = "×";
+    } else {
       (app.view as HTMLCanvasElement).style.transform = "translateX(-150px)";
       toggle.innerText = "☰";
     }
@@ -101,7 +103,6 @@ export async function createMenuCanvas(
     window.removeEventListener("resize", onResize);
     try {
       app.destroy(true, { children: true, texture: true });
-    }
-    catch {}
+    } catch {}
   };
 }

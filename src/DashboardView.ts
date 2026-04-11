@@ -1,20 +1,16 @@
 // DashboardView.ts
 import { Application, Graphics, Text } from "pixi.js";
-import { 
-  createCustomCanvas, 
-  CanvasConfig, 
-  ViewContentProvider 
+import {
+  createCustomCanvas,
+  CanvasConfig,
+  ViewContentProvider,
 } from "./CanvasUtils";
 import { UserDataProps } from "./UserData";
 
 export const DASHBOARD_VIEW_ID = "dashboard-view-container";
 
 class DashboardContentProvider implements ViewContentProvider {
-
-  async setupContent(app: Application): Promise<void>
-  {
-    
-  }
+  async setupContent(app: Application): Promise<void> {}
 }
 
 export async function createDashboardView(container: HTMLElement) {

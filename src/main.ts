@@ -1,7 +1,6 @@
 import { createSplashView, SPLASH_VIEW_ID } from "./SplashView";
 import { createMenuCanvas, MENU_CANVAS_ID } from "./MenuCanvas";
 import { createCanvasContainer } from "./CanvasUtils";
-//import { createUserPanelCanvas, USER_PANEL_CANVAS_ID } from "./UserPanelCanvas";
 import { DASHBOARD_VIEW_ID, createDashboardView } from "./DashboardView";
 import { GAMES_VIEW_ID, createGamesView } from "./GamesView";
 
@@ -12,7 +11,7 @@ const components = [
 ];
 
 // View manager to handle navigation between pages
-let viewContainers: Map<string, HTMLElement> = new Map();
+const viewContainers: Map<string, HTMLElement> = new Map();
 let currentView: string = SPLASH_VIEW_ID;
 
 function showView(viewId: string) {
