@@ -1,19 +1,15 @@
-import { createSplashView, SPLASH_VIEW_ID } from "./SplashView";
 import { createMenuCanvas, MENU_CANVAS_ID } from "./MenuCanvas";
 import { createCanvasContainer } from "./CanvasUtils";
-import { createUserPanelCanvas, USER_PANEL_CANVAS_ID } from "./UserPanelCanvas";
 import { DASHBOARD_VIEW_ID, createDashboardView } from "./DashboardView";
-import { GAMES_VIEW_ID, createGamesView } from "./GamesView";
-
+import { AUTHENTICATION_VIEW_ID } from "./AuthenticationView";
 const components = [
-  { label: "Splash", id: SPLASH_VIEW_ID },
-  { label: "Games", id: GAMES_VIEW_ID },
+  { label: "Splash", id: AUTHENTICATION_VIEW_ID },
   { label: "Dashboard", id: DASHBOARD_VIEW_ID }
 ];
 
 // View manager to handle navigation between pages
 let viewContainers: Map<string, HTMLElement> = new Map();
-let currentView: string = SPLASH_VIEW_ID;
+let currentView: string = AUTHENTICATION_VIEW_ID;
 
 function showView(viewId: string) {
   // Hide all views
@@ -37,35 +33,31 @@ function showView(viewId: string) {
   document.body.appendChild(menuContainer);
   await createMenuCanvas(menuContainer, components, showView);
 
-  // Create and mount the user panel canvas (right side)
-  const userPanelContainer = document.createElement("div");
-  userPanelContainer.id = USER_PANEL_CANVAS_ID;
-  document.body.appendChild(userPanelContainer);
-  await createUserPanelCanvas(userPanelContainer);
-
   // Create all canvases using standardized container creation
   const mainContainer = document.body;
-
-  // Create splash view with standardized styling
-  const splashContainer = createCanvasContainer(mainContainer, SPLASH_VIEW_ID);
-  await createSplashView(splashContainer);
-  viewContainers.set(SPLASH_VIEW_ID, splashContainer);
-
-  // Create games view with standardized styling
-  const gamesContainer = createCanvasContainer(mainContainer, GAMES_VIEW_ID);
-  await createGamesView(gamesContainer);
-  viewContainers.set(GAMES_VIEW_ID, gamesContainer);
 
   // Create dashboard view with standardized styling
   const dashboardContainer = createCanvasContainer(
     mainContainer,
     DASHBOARD_VIEW_ID,
   );
+
   await createDashboardView(dashboardContainer);
+
   viewContainers.set(DASHBOARD_VIEW_ID, dashboardContainer);
 
+  // Create authentication view with standardized styling
+  const authenticationContainer = createCanvasContainer(
+    mainContainer,
+    DASHBOARD_VIEW_ID,
+  );
+
+  await createDashboardView(authenticationContainer);
+  
+  viewContainers.set(AUTHENTICATION_VIEW_ID, authenticationContainer);
+
   // Show initial view
-  showView(SPLASH_VIEW_ID);
+  showView(AUTHENTICATION_VIEW_ID);
 
   // Handle browser back/forward buttons
   window.addEventListener("hashchange", () => {
