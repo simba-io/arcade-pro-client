@@ -1,9 +1,9 @@
 import { createMenuCanvas, MENU_CANVAS_ID } from "./MenuCanvas";
 import { createCanvasContainer } from "./CanvasUtils";
 import { DASHBOARD_VIEW_ID, createDashboardView } from "./DashboardView";
-import { AUTHENTICATION_VIEW_ID } from "./AuthenticationView";
+import { AUTHENTICATION_VIEW_ID, createAuthenticationView } from "./AuthenticationView";
 const components = [
-  { label: "Splash", id: AUTHENTICATION_VIEW_ID },
+  { label: "Login / Register", id: AUTHENTICATION_VIEW_ID },
   { label: "Dashboard", id: DASHBOARD_VIEW_ID }
 ];
 
@@ -49,10 +49,10 @@ function showView(viewId: string) {
   // Create authentication view with standardized styling
   const authenticationContainer = createCanvasContainer(
     mainContainer,
-    DASHBOARD_VIEW_ID,
+    AUTHENTICATION_VIEW_ID,
   );
 
-  await createDashboardView(authenticationContainer);
+  await createAuthenticationView(authenticationContainer);
   
   viewContainers.set(AUTHENTICATION_VIEW_ID, authenticationContainer);
 
