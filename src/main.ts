@@ -1,5 +1,5 @@
 import * as PIXI from 'pixi.js';
-import { Scene } from './Scene';
+import { MainContainer } from './MainContainer';
 
 // Configuration for your "Safe Zone" / Design resolution
 const DESIGN_WIDTH = 1920;
@@ -19,8 +19,8 @@ async function init()
     document.getElementById('game-container')!.appendChild(app.canvas);
 
     // Create a main container to hold all game objects
-    const scene = new Scene();
-    app.stage.addChild(scene);
+    const mainContainer = new MainContainer();
+    app.stage.addChild(mainContainer);
 
     // Placeholder: A centered sprite or graphic to test scaling
     const graphics = new PIXI.Graphics()
@@ -28,7 +28,7 @@ async function init()
         .fill({ color: 0xffffff, alpha: 0.1 })
         .stroke({ width: 10, color: 0xff0000 });
     
-    scene.addChild(graphics);
+    mainContainer.addChild(graphics);
 
     // Resize function to maintain aspect ratio (Letterboxing)
     const resize = () => 
@@ -39,11 +39,11 @@ async function init()
         // Calculate scale to fit the screen
         const scale = Math.min(screenWidth / DESIGN_WIDTH, screenHeight / DESIGN_HEIGHT);
 
-        scene.scale.set(scale);
+        mainContainer.scale.set(scale);
 
         // Center the scene
-        scene.x = (screenWidth - DESIGN_WIDTH * scale) / 2;
-        scene.y = (screenHeight - DESIGN_HEIGHT * scale) / 2;
+        mainContainer.x = (screenWidth - DESIGN_WIDTH * scale) / 2;
+        mainContainer.y = (screenHeight - DESIGN_HEIGHT * scale) / 2;
     };
 
     window.addEventListener('resize', resize);
