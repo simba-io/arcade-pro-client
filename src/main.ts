@@ -2,9 +2,18 @@ import { createMenuCanvas, MENU_CANVAS_ID } from "./MenuCanvas";
 import { createCanvasContainer } from "./CanvasUtils";
 import { DASHBOARD_VIEW_ID, createDashboardView } from "./DashboardView";
 import { AUTHENTICATION_VIEW_ID, createAuthenticationView } from "./AuthenticationView";
+import { GAMES_VIEW_ID, createGamesView } from "./GamesView";
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+export const supabase = createClient(supabaseUrl, supabaseKey);
+
 const components = [
   { label: "Login / Register", id: AUTHENTICATION_VIEW_ID },
-  { label: "Dashboard", id: DASHBOARD_VIEW_ID }
+  { label: "Dashboard", id: DASHBOARD_VIEW_ID },
+  { label: "Games", id: GAMES_VIEW_ID },
 ];
 
 // View manager to handle navigation between pages
@@ -26,7 +35,7 @@ function showView(viewId: string) {
   }
 }
 
-(async () => {
+(async () => {  
   // Create and mount the menu canvas (left side)
   const menuContainer = document.createElement("div");
   menuContainer.id = MENU_CANVAS_ID;
@@ -55,6 +64,16 @@ function showView(viewId: string) {
   await createAuthenticationView(authenticationContainer);
   
   viewContainers.set(AUTHENTICATION_VIEW_ID, authenticationContainer);
+
+   // Create games view with standardized styling
+  const gamesViewContainer = createCanvasContainer(
+    mainContainer,
+    GAMES_VIEW_ID,
+  );
+
+  await createGamesView(gamesViewContainer);
+  
+  viewContainers.set(GAMES_VIEW_ID, gamesViewContainer);
 
   // Show initial view
   showView(AUTHENTICATION_VIEW_ID);

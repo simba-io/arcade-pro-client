@@ -1,6 +1,7 @@
 // AuthenticationView.ts
 import { Application, Container, Graphics, Text, TextStyle } from "pixi.js";
 import { createCustomCanvas, CanvasConfig, ViewContentProvider } from "./CanvasUtils";
+import { supabase } from "./main";
 
 export const AUTHENTICATION_VIEW_ID = "authentication-view-container";
 
@@ -334,11 +335,15 @@ class AuthenticationContentProvider implements ViewContentProvider {
   }
 
   private async handleLoginSubmit(fields: FormFields): Promise<void> {
+    await supabase.auth.signInWithPassword({ email: fields.email, password: fields.password });
     // TODO: Implement login logic
     console.log("Login submit:", { email: fields.email, password: fields.password });
   }
 
   private async handleRegisterSubmit(fields: FormFields): Promise<void> {
+    await supabase.auth.signUp({ email: fields.email, password: fields.password });
+
+    console.log(supabase.auth);
     // TODO: Implement registration logic
     console.log("Register submit:", { email: fields.email, password: fields.password, confirmPassword: fields.confirmPassword });
   }
