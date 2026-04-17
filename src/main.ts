@@ -1,88 +1,53 @@
-import { createMenuCanvas, MENU_CANVAS_ID } from "./MenuCanvas";
-import { createCanvasContainer } from "./CanvasUtils";
-import { DASHBOARD_VIEW_ID, createDashboardView } from "./DashboardView";
-import { AUTHENTICATION_VIEW_ID, createAuthenticationView } from "./AuthenticationView";
-import { GAMES_VIEW_ID, createGamesView } from "./GamesView";
-import { createClient } from '@supabase/supabase-js';
+import * as PIXI from 'pixi.js';
+import { Scene } from './Scene';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+// Configuration for your "Safe Zone" / Design resolution
+const DESIGN_WIDTH = 1920;
+const DESIGN_HEIGHT = 1080;
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+const app = new PIXI.Application();
 
-const components = [
-  { label: "Login / Register", id: AUTHENTICATION_VIEW_ID },
-  { label: "Dashboard", id: DASHBOARD_VIEW_ID },
-  { label: "Games", id: GAMES_VIEW_ID },
-];
+async function init()
+{
+    await app.init({
+        background: '#1099bb',
+        resizeTo: window, // Automatically matches the browser window size
+        antialias: true,
+        resolution: window.devicePixelRatio || 1,
+    });
 
-// View manager to handle navigation between pages
-let viewContainers: Map<string, HTMLElement> = new Map();
-let currentView: string = AUTHENTICATION_VIEW_ID;
+    document.getElementById('game-container')!.appendChild(app.canvas);
 
-function showView(viewId: string) {
-  // Hide all views
-  viewContainers.forEach((container) => {
-    container.style.display = "none";
-  });
-  // Show the selected view
-  const selectedView = viewContainers.get(viewId);
-  if (selectedView) {
-    selectedView.style.display = "block";
-    currentView = viewId;
-    // Update URL hash for browser history
-    window.location.hash = viewId;
-  }
+    // Create a main container to hold all game objects
+    const scene = new Scene();
+    app.stage.addChild(scene);
+
+    // Placeholder: A centered sprite or graphic to test scaling
+    const graphics = new PIXI.Graphics()
+        .rect(0, 0, DESIGN_WIDTH, DESIGN_HEIGHT)
+        .fill({ color: 0xffffff, alpha: 0.1 })
+        .stroke({ width: 10, color: 0xff0000 });
+    
+    scene.addChild(graphics);
+
+    // Resize function to maintain aspect ratio (Letterboxing)
+    const resize = () => 
+    {
+        const screenWidth = window.innerWidth;
+        const screenHeight = window.innerHeight;
+
+        // Calculate scale to fit the screen
+        const scale = Math.min(screenWidth / DESIGN_WIDTH, screenHeight / DESIGN_HEIGHT);
+
+        scene.scale.set(scale);
+
+        // Center the scene
+        scene.x = (screenWidth - DESIGN_WIDTH * scale) / 2;
+        scene.y = (screenHeight - DESIGN_HEIGHT * scale) / 2;
+    };
+
+    window.addEventListener('resize', resize);
+    resize(); // Initial call
 }
 
-(async () => {  
-  // Create and mount the menu canvas (left side)
-  const menuContainer = document.createElement("div");
-  menuContainer.id = MENU_CANVAS_ID;
-  document.body.appendChild(menuContainer);
-  await createMenuCanvas(menuContainer, components, showView);
-
-  // Create all canvases using standardized container creation
-  const mainContainer = document.body;
-
-  // Create dashboard view with standardized styling
-  const dashboardContainer = createCanvasContainer(
-    mainContainer,
-    DASHBOARD_VIEW_ID,
-  );
-
-  await createDashboardView(dashboardContainer);
-
-  viewContainers.set(DASHBOARD_VIEW_ID, dashboardContainer);
-
-  // Create authentication view with standardized styling
-  const authenticationContainer = createCanvasContainer(
-    mainContainer,
-    AUTHENTICATION_VIEW_ID,
-  );
-
-  await createAuthenticationView(authenticationContainer);
-  
-  viewContainers.set(AUTHENTICATION_VIEW_ID, authenticationContainer);
-
-   // Create games view with standardized styling
-  const gamesViewContainer = createCanvasContainer(
-    mainContainer,
-    GAMES_VIEW_ID,
-  );
-
-  await createGamesView(gamesViewContainer);
-  
-  viewContainers.set(GAMES_VIEW_ID, gamesViewContainer);
-
-  // Show initial view
-  showView(AUTHENTICATION_VIEW_ID);
-
-  // Handle browser back/forward buttons
-  window.addEventListener("hashchange", () => {
-    const hash = window.location.hash.slice(1);
-    if (viewContainers.has(hash)) {
-      showView(hash);
-    }
-  });
-})();
+init();
