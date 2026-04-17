@@ -1,4 +1,4 @@
-// ContactView.ts
+// DashboardView.ts
 import { Application, Graphics, Text } from "pixi.js";
 import { 
   createCustomCanvas, 
@@ -6,20 +6,20 @@ import {
   ViewContentProvider 
 } from "./CanvasUtils";
 
-export const CONTACT_VIEW_ID = "contact-view-container";
+export const DASHBOARD_VIEW_ID = "dashboard-view-container";
 
-class ContactContentProvider implements ViewContentProvider {
+class DashboardContentProvider implements ViewContentProvider {
   async setupContent(app: Application): Promise<void> {
     
   }
 }
 
-export async function createContactView(container: HTMLElement) {
+export async function createDashboardView(container: HTMLElement) {
   const config: CanvasConfig = {
     backgroundColor: "#43a047",
-    containerId: CONTACT_VIEW_ID,
+    containerId: DASHBOARD_VIEW_ID,
   };
 
-  const contentProvider = new ContactContentProvider();
+  const contentProvider = new DashboardContentProvider();
   return await createCustomCanvas(container, config, contentProvider);
 }

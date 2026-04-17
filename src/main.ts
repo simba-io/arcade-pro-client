@@ -45,10 +45,10 @@ function showView(viewId: string) {
   // Create all canvases using standardized container creation
   const mainContainer = document.body;
 
-  // Create contact view with standardized styling
-  const contactContainer = createCanvasContainer(
+  // Create dashboard view with standardized styling
+  const dashboardContainer = createCanvasContainer(
     mainContainer,
-    CONTACT_VIEW_ID,
+    DASHBOARD_VIEW_ID,
   );
 
   await createDashboardView(dashboardContainer);
