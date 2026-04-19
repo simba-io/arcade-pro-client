@@ -2,6 +2,7 @@
 import { Application, Container, Graphics, Text, TextStyle } from "pixi.js";
 import { createCustomCanvas, CanvasConfig, ViewContentProvider } from "./CanvasUtils";
 import { supabase } from "./main";
+import { SignUpWithPasswordCredentials } from "@supabase/supabase-js";
 
 export const AUTHENTICATION_VIEW_ID = "authentication-view-container";
 
@@ -39,7 +40,7 @@ class AuthenticationContentProvider implements ViewContentProvider {
 
     // Setup keyboard listeners
     document.addEventListener("keydown", (e) => this.handleKeyDown(e));
-    document.addEventListener("keyup", (e) => this.handleKeyUp(e));
+    document.addEventListener("keyup", () => this.handleKeyUp());
 
     // Handle window resize
     window.addEventListener("resize", () => {
@@ -160,7 +161,7 @@ class AuthenticationContentProvider implements ViewContentProvider {
     yPosition += 40;
 
     // Email input field
-    this.createInputField(cardContainer, "email", yPosition, false, mainContainer);
+    this.createInputField(cardContainer, "email", yPosition, false);
     yPosition += 50;
 
     // Password label
@@ -175,7 +176,7 @@ class AuthenticationContentProvider implements ViewContentProvider {
     yPosition += 40;
 
     // Password input field
-    this.createInputField(cardContainer, "password", yPosition, true, mainContainer);
+    this.createInputField(cardContainer, "password", yPosition, true);
     yPosition += 50;
 
     // Confirm Password field (register only)
@@ -190,7 +191,7 @@ class AuthenticationContentProvider implements ViewContentProvider {
 
       yPosition += 40;
 
-      this.createInputField(cardContainer, "confirmPassword", yPosition, true, mainContainer);
+      this.createInputField(cardContainer, "confirmPassword", yPosition, true);
       yPosition += 50;
     }
 
@@ -228,8 +229,7 @@ class AuthenticationContentProvider implements ViewContentProvider {
     container: Container,
     fieldId: string,
     yPosition: number,
-    isPassword: boolean,
-    mainContainer: Container
+    isPassword: boolean
   ): void {
     // Initialize input field if not exists
     if (!this.inputFields.has(fieldId)) {
@@ -313,7 +313,7 @@ class AuthenticationContentProvider implements ViewContentProvider {
     }
   }
 
-  private handleKeyUp(event: KeyboardEvent): void {
+  private handleKeyUp(): void {
     this.cursorVisible = true;
     this.cursorBlinkTimer = 0;
   }
@@ -336,12 +336,16 @@ class AuthenticationContentProvider implements ViewContentProvider {
 
   private async handleLoginSubmit(fields: FormFields): Promise<void> {
     await supabase.auth.signInWithPassword({ email: fields.email, password: fields.password });
+
+    
+
     // TODO: Implement login logic
     console.log("Login submit:", { email: fields.email, password: fields.password });
   }
 
   private async handleRegisterSubmit(fields: FormFields): Promise<void> {
     await supabase.auth.signUp({ email: fields.email, password: fields.password });
+    
 
     console.log(supabase.auth);
     // TODO: Implement registration logic

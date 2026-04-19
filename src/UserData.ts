@@ -7,16 +7,24 @@ export interface UserData
 export interface UserAuthenticationData
 {
     uid: string;
-    displayName: string;
     email: string;
 }
 
 export interface UserPlayerData
 {
     uid: string;
-    displayName: string;
+    userName: string;
     wins: number;
-    losses: number;
     rank: number;
     funds: number;
+}
+
+export class UserObject
+{
+    userData: UserData;
+
+    constructor(userData: UserData)
+    {
+        this.userData = userData;
+    }
 }

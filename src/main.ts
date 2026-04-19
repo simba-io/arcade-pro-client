@@ -18,9 +18,50 @@ const components = [
 
 // View manager to handle navigation between pages
 let viewContainers: Map<string, HTMLElement> = new Map();
-let currentView: string = AUTHENTICATION_VIEW_ID;
+let isAuthenticated = false;
+let logoutButton: HTMLButtonElement | null = null;
+
+function setAuthenticatedUI(authenticated: boolean) {
+  isAuthenticated = authenticated;
+
+  const authenticationContainer = viewContainers.get(AUTHENTICATION_VIEW_ID);
+  if (authenticationContainer) {
+    authenticationContainer.style.display = authenticated ? "none" : "block";
+  }
+
+  if (logoutButton) {
+    logoutButton.style.display = authenticated ? "block" : "none";
+  }
+}
+
+function createLogoutButton() {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.textContent = "Log out";
+  button.style.position = "fixed";
+  button.style.top = "8px";
+  button.style.right = "8px";
+  button.style.padding = "8px 12px";
+  button.style.border = "none";
+  button.style.borderRadius = "6px";
+  button.style.background = "#37474f";
+  button.style.color = "#ffffff";
+  button.style.fontSize = "14px";
+  button.style.cursor = "pointer";
+  button.style.zIndex = "1100";
+  button.style.display = "none";
+  button.addEventListener("click", async () => {
+    await supabase.auth.signOut();
+  });
+  document.body.appendChild(button);
+  logoutButton = button;
+}
 
 function showView(viewId: string) {
+  if (isAuthenticated && viewId === AUTHENTICATION_VIEW_ID) {
+    viewId = DASHBOARD_VIEW_ID;
+  }
+
   // Hide all views
   viewContainers.forEach((container) => {
     container.style.display = "none";
@@ -29,13 +70,14 @@ function showView(viewId: string) {
   const selectedView = viewContainers.get(viewId);
   if (selectedView) {
     selectedView.style.display = "block";
-    currentView = viewId;
     // Update URL hash for browser history
     window.location.hash = viewId;
   }
 }
 
 (async () => {  
+  createLogoutButton();
+
   // Create and mount the menu canvas (left side)
   const menuContainer = document.createElement("div");
   menuContainer.id = MENU_CANVAS_ID;
@@ -75,9 +117,39 @@ function showView(viewId: string) {
   
   viewContainers.set(GAMES_VIEW_ID, gamesViewContainer);
 
-  // Show initial view
-  showView(AUTHENTICATION_VIEW_ID);
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  setAuthenticatedUI(Boolean(session));
 
+  // Show initial view
+  if (session) {
+    showView(DASHBOARD_VIEW_ID);
+  } else {
+    showView(AUTHENTICATION_VIEW_ID);
+  }
+
+  supabase.auth.onAuthStateChange((_event, sessionData) => {
+    const authenticated = Boolean(sessionData);
+    setAuthenticatedUI(authenticated);
+    if (authenticated) {
+      showView(DASHBOARD_VIEW_ID);
+      return;
+    }
+    showView(AUTHENTICATION_VIEW_ID);
+  });
+
+  const uid =(await supabase.auth.getUser()).data.user?.id;
+
+  const data = await supabase.from('UserData').insert({uid: uid, userName: "testUser", wins: 2, rank: 7, funds: 5.76}).select();
+
+  try
+  {
+    console.log("UserData from Supabase:", data);
+  }
+  catch (error)  {
+    console.error("Error fetching user data:", error);
+  }
   // Handle browser back/forward buttons
   window.addEventListener("hashchange", () => {
     const hash = window.location.hash.slice(1);
