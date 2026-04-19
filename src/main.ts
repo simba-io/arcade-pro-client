@@ -139,17 +139,6 @@ function showView(viewId: string) {
     showView(AUTHENTICATION_VIEW_ID);
   });
 
-  /* const uid =(await supabase.auth.getUser()).data.user?.id;
-
-  const data = await supabase.from('UserData').insert({uid: uid, userName: "testUser", wins: 2, rank: 7, funds: 5.76}).select();
-
-  try
-  {
-    console.log("UserData from Supabase:", data);
-  }
-  catch (error)  {
-    console.error("Error fetching user data:", error);
-  } */
   // Handle browser back/forward buttons
   window.addEventListener("hashchange", () => {
     const hash = window.location.hash.slice(1);

@@ -15,7 +15,7 @@ export interface UserPlayerData
     uid: string;
     userName: string;
     wins: number;
-    rank: number;
+    level: number;
     funds: number;
 }
 
