@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { supabase } from "./main";
+import type { UserPaymentData } from "./UserData";
 
 export const DASHBOARD_VIEW_ID = "dashboard-view-container";
 
@@ -11,11 +12,21 @@ type DashboardStats = {
 };
 
 function DashboardPanel() {
-  const [uid, setUid] = useState("");
   const [email, setEmail] = useState("");
   const [userName, setUserName] = useState("");
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [fundsBalance, setFundsBalance] = useState(0);
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [paymentSaving, setPaymentSaving] = useState(false);
+  const [paymentMessage, setPaymentMessage] = useState("");
+  const [paymentForm, setPaymentForm] = useState<UserPaymentData>({
+    uid: "",
+    name: "",
+    cardNumber: "",
+    expiryDate: "",
+    cvv: "",
+    billingAddress: "",
+  });
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -34,7 +45,7 @@ function DashboardPanel() {
         return;
       }
 
-      setUid(user.id);
+      setPaymentForm((prev) => ({ ...prev, uid: user.id }));
       setEmail(user.email ?? "");
       const metadataName =
         typeof user.user_metadata?.username === "string"
@@ -68,11 +79,80 @@ function DashboardPanel() {
         setFundsBalance(0);
       }
 
+      const { data: paymentData } = await supabase
+        .from("UserPaymentData")
+        .select("uid,name,cardNumber,expiryDate,cvv,billingAddress")
+        .eq("uid", user.id)
+        .maybeSingle();
+
+      if (paymentData) {
+        setPaymentForm({
+          uid: paymentData.uid ?? user.id,
+          name: paymentData.name ?? "",
+          cardNumber: paymentData.cardNumber ?? "",
+          expiryDate: paymentData.expiryDate ?? "",
+          cvv: paymentData.cvv ?? "",
+          billingAddress: paymentData.billingAddress ?? "",
+        });
+      }
+
       setLoading(false);
     }
 
     loadDashboard();
   }, []);
+
+  async function handlePaymentSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setPaymentMessage("");
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      setPaymentMessage("No authenticated user found.");
+      return;
+    }
+
+    const authenticatedUid = user.id;
+
+    if (
+      !paymentForm.name.trim() ||
+      !paymentForm.cardNumber.trim() ||
+      !paymentForm.expiryDate.trim() ||
+      !paymentForm.cvv.trim() ||
+      !paymentForm.billingAddress.trim()
+    ) {
+      setPaymentMessage("All payment fields are required.");
+      return;
+    }
+
+    setPaymentSaving(true);
+    const payload: UserPaymentData = {
+      ...paymentForm,
+      uid: authenticatedUid,
+    };
+
+    const { error } = await supabase
+      .from("UserPaymentData")
+      .upsert(payload, { onConflict: "uid" });
+
+    if (error) {
+      if (error.message.toLowerCase().includes("row-level security")) {
+        setPaymentMessage(
+          "Payment save blocked by Supabase RLS policy. Add insert/update/select policies for UserPaymentData where auth.uid() = uid.",
+        );
+      } else {
+        setPaymentMessage(error.message);
+      }
+      setPaymentSaving(false);
+      return;
+    }
+
+    setPaymentMessage("Payment information saved.");
+    setPaymentSaving(false);
+  }
 
   const cardStyle: React.CSSProperties = {
     width: "100%",
@@ -241,7 +321,144 @@ function DashboardPanel() {
                 >
                   Withdraw
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setShowPaymentForm((prev) => !prev)}
+                  style={{
+                    border: "none",
+                    borderRadius: "8px",
+                    padding: "9px 14px",
+                    fontSize: "14px",
+                    fontWeight: 700,
+                    color: "#ffffff",
+                    background: "#1565c0",
+                    cursor: "pointer",
+                  }}
+                >
+                  {showPaymentForm ? "Hide Payment Form" : "Manage Payment Info"}
+                </button>
               </div>
+
+              {showPaymentForm && (
+                <form onSubmit={handlePaymentSubmit} style={{ marginTop: "14px" }}>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                      gap: "10px",
+                    }}
+                  >
+                    <input
+                      type="text"
+                      placeholder="Name on card"
+                      value={paymentForm.name}
+                      onChange={(event) =>
+                        setPaymentForm((prev) => ({
+                          ...prev,
+                          name: event.target.value,
+                        }))
+                      }
+                      style={{
+                        border: "1px solid #c8d2dc",
+                        borderRadius: "8px",
+                        padding: "9px 10px",
+                        fontSize: "14px",
+                      }}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Card number"
+                      value={paymentForm.cardNumber}
+                      onChange={(event) =>
+                        setPaymentForm((prev) => ({
+                          ...prev,
+                          cardNumber: event.target.value,
+                        }))
+                      }
+                      style={{
+                        border: "1px solid #c8d2dc",
+                        borderRadius: "8px",
+                        padding: "9px 10px",
+                        fontSize: "14px",
+                      }}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Expiry date (MM/YY)"
+                      value={paymentForm.expiryDate}
+                      onChange={(event) =>
+                        setPaymentForm((prev) => ({
+                          ...prev,
+                          expiryDate: event.target.value,
+                        }))
+                      }
+                      style={{
+                        border: "1px solid #c8d2dc",
+                        borderRadius: "8px",
+                        padding: "9px 10px",
+                        fontSize: "14px",
+                      }}
+                    />
+                    <input
+                      type="password"
+                      placeholder="CVV"
+                      value={paymentForm.cvv}
+                      onChange={(event) =>
+                        setPaymentForm((prev) => ({
+                          ...prev,
+                          cvv: event.target.value,
+                        }))
+                      }
+                      style={{
+                        border: "1px solid #c8d2dc",
+                        borderRadius: "8px",
+                        padding: "9px 10px",
+                        fontSize: "14px",
+                      }}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Billing address"
+                      value={paymentForm.billingAddress}
+                      onChange={(event) =>
+                        setPaymentForm((prev) => ({
+                          ...prev,
+                          billingAddress: event.target.value,
+                        }))
+                      }
+                      style={{
+                        border: "1px solid #c8d2dc",
+                        borderRadius: "8px",
+                        padding: "9px 10px",
+                        fontSize: "14px",
+                      }}
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={paymentSaving}
+                    style={{
+                      marginTop: "10px",
+                      border: "none",
+                      borderRadius: "8px",
+                      padding: "9px 14px",
+                      fontSize: "14px",
+                      fontWeight: 700,
+                      color: "#ffffff",
+                      background: "#1f2937",
+                      cursor: paymentSaving ? "not-allowed" : "pointer",
+                      opacity: paymentSaving ? 0.7 : 1,
+                    }}
+                  >
+                    {paymentSaving ? "Saving..." : "Save Payment Info"}
+                  </button>
+                  {paymentMessage && (
+                    <p style={{ margin: "8px 0 0", color: "#334155", fontSize: "13px" }}>
+                      {paymentMessage}
+                    </p>
+                  )}
+                </form>
+              )}
             </div>
           </>
         )}

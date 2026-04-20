@@ -2,6 +2,17 @@ export interface UserData
 {
     auth: UserAuthenticationData;
     player: UserPlayerData;
+    payment: UserPaymentData;
+}
+
+export interface UserPaymentData
+{
+    uid: string;
+    name: string;
+    cardNumber: string;
+    expiryDate: string;
+    cvv: string;
+    billingAddress: string;
 }
 
 export interface UserAuthenticationData
