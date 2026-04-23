@@ -1,7 +1,7 @@
 import { createMenuCanvas, MENU_CANVAS_ID } from "./MenuCanvas";
 import { createCanvasContainer } from "./CanvasUtils";
-import { DASHBOARD_VIEW_ID, createDashboardView } from "./DashboardView";
-import { AUTHENTICATION_VIEW_ID, createAuthenticationView } from "./AuthenticationView";
+import { DASHBOARD_VIEW_ID, createDashboardView } from "./DashboardView.tsx";
+import { AUTHENTICATION_VIEW_ID, createAuthenticationView } from "./AuthenticationView.tsx";
 import { GAMES_VIEW_ID, createGamesView } from "./GamesView";
 import { createClient } from '@supabase/supabase-js';
 
@@ -20,6 +20,28 @@ const components = [
 let viewContainers: Map<string, HTMLElement> = new Map();
 let isAuthenticated = false;
 let logoutButton: HTMLButtonElement | null = null;
+let menuContainer: HTMLDivElement | null = null;
+let destroyMenuCanvas: (() => void) | null = null;
+
+async function renderMenu(authenticated: boolean) {
+  if (!menuContainer) return;
+
+  if (destroyMenuCanvas) {
+    destroyMenuCanvas();
+    destroyMenuCanvas = null;
+  }
+
+  menuContainer.innerHTML = "";
+  const visibleComponents = authenticated
+    ? components.filter((component) => component.id !== AUTHENTICATION_VIEW_ID)
+    : components;
+
+  destroyMenuCanvas = await createMenuCanvas(
+    menuContainer,
+    visibleComponents,
+    showView,
+  );
+}
 
 function setAuthenticatedUI(authenticated: boolean) {
   isAuthenticated = authenticated;
@@ -79,10 +101,9 @@ function showView(viewId: string) {
   createLogoutButton();
 
   // Create and mount the menu canvas (left side)
-  const menuContainer = document.createElement("div");
+  menuContainer = document.createElement("div");
   menuContainer.id = MENU_CANVAS_ID;
   document.body.appendChild(menuContainer);
-  await createMenuCanvas(menuContainer, components, showView);
 
   // Create all canvases using standardized container creation
   const mainContainer = document.body;
@@ -121,6 +142,7 @@ function showView(viewId: string) {
     data: { session },
   } = await supabase.auth.getSession();
   setAuthenticatedUI(Boolean(session));
+  await renderMenu(Boolean(session));
 
   // Show initial view
   if (session) {
@@ -132,6 +154,7 @@ function showView(viewId: string) {
   supabase.auth.onAuthStateChange((_event, sessionData) => {
     const authenticated = Boolean(sessionData);
     setAuthenticatedUI(authenticated);
+    void renderMenu(authenticated);
     if (authenticated) {
       showView(DASHBOARD_VIEW_ID);
       return;
