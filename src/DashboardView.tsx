@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { supabase } from "./main";
 import type { UserPaymentData } from "./UserData";
+import { dashboardStyles as styles } from "./DashboardViewStyles";
 
 export const DASHBOARD_VIEW_ID = "dashboard-view-container";
 
@@ -11,7 +12,8 @@ type DashboardStats = {
   level: number;
 };
 
-function DashboardPanel() {
+function DashboardPanel()
+{
   const [email, setEmail] = useState("");
   const [userName, setUserName] = useState("");
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -30,8 +32,10 @@ function DashboardPanel() {
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
 
-  useEffect(() => {
-    async function loadDashboard() {
+  useEffect(() =>
+  {
+    async function loadDashboard()
+    {
       setLoading(true);
       setErrorMessage("");
 
@@ -39,7 +43,8 @@ function DashboardPanel() {
         data: { user },
       } = await supabase.auth.getUser();
 
-      if (!user) {
+      if (!user)
+      {
         setErrorMessage("No authenticated user found.");
         setLoading(false);
         return;
@@ -47,10 +52,12 @@ function DashboardPanel() {
 
       setPaymentForm((prev) => ({ ...prev, uid: user.id }));
       setEmail(user.email ?? "");
+
       const metadataName =
         typeof user.user_metadata?.username === "string"
           ? user.user_metadata.username
           : "";
+
       setUserName(metadataName);
 
       const { data, error } = await supabase
@@ -59,9 +66,12 @@ function DashboardPanel() {
         .eq("uid", user.id)
         .maybeSingle();
 
-      if (error) {
+      if (error)
+      {
         setErrorMessage(error.message);
-      } else if (data) {
+      }
+      else if (data)
+      {
         const resolvedName = data.userName || metadataName || "Player";
         setUserName(resolvedName);
         setStats({
@@ -70,7 +80,9 @@ function DashboardPanel() {
           level: Number(data.level ?? 1),
         });
         setFundsBalance(Number(data.funds ?? 0));
-      } else {
+      }
+      else
+      {
         setStats({
           userName: metadataName || "Player",
           wins: 0,
@@ -85,7 +97,8 @@ function DashboardPanel() {
         .eq("uid", user.id)
         .maybeSingle();
 
-      if (paymentData) {
+      if (paymentData)
+      {
         setPaymentForm({
           uid: paymentData.uid ?? user.id,
           name: paymentData.name ?? "",
@@ -102,7 +115,8 @@ function DashboardPanel() {
     loadDashboard();
   }, []);
 
-  async function handlePaymentSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handlePaymentSubmit(event: FormEvent<HTMLFormElement>)
+  {
     event.preventDefault();
     setPaymentMessage("");
 
@@ -110,7 +124,8 @@ function DashboardPanel() {
       data: { user },
     } = await supabase.auth.getUser();
 
-    if (!user) {
+    if (!user)
+    {
       setPaymentMessage("No authenticated user found.");
       return;
     }
@@ -123,12 +138,14 @@ function DashboardPanel() {
       !paymentForm.expiryDate.trim() ||
       !paymentForm.cvv.trim() ||
       !paymentForm.billingAddress.trim()
-    ) {
+    )
+    {
       setPaymentMessage("All payment fields are required.");
       return;
     }
 
     setPaymentSaving(true);
+
     const payload: UserPaymentData = {
       ...paymentForm,
       uid: authenticatedUid,
@@ -138,14 +155,19 @@ function DashboardPanel() {
       .from("UserPaymentData")
       .upsert(payload, { onConflict: "uid" });
 
-    if (error) {
-      if (error.message.toLowerCase().includes("row-level security")) {
+    if (error)
+    {
+      if (error.message.toLowerCase().includes("row-level security"))
+      {
         setPaymentMessage(
           "Payment save blocked by Supabase RLS policy. Add insert/update/select policies for UserPaymentData where auth.uid() = uid.",
         );
-      } else {
+      }
+      else
+      {
         setPaymentMessage(error.message);
       }
+
       setPaymentSaving(false);
       return;
     }
@@ -154,200 +176,112 @@ function DashboardPanel() {
     setPaymentSaving(false);
   }
 
-  const cardStyle: React.CSSProperties = {
-    width: "100%",
-    maxWidth: "820px",
-    background: "rgba(255, 255, 255, 0.9)",
-    borderRadius: "16px",
-    border: "1px solid rgba(0, 0, 0, 0.07)",
-    boxShadow: "0 24px 50px rgba(0, 0, 0, 0.14)",
-    padding: "28px",
-    boxSizing: "border-box",
+  const depositButtonStyle = {
+    ...styles.actionButton,
+    ...styles.depositButton,
   };
 
-  const statGridStyle: React.CSSProperties = {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-    gap: "12px",
-    marginTop: "20px",
+  const withdrawButtonStyle = {
+    ...styles.actionButton,
+    ...styles.withdrawButton,
   };
 
-  const statCardStyle: React.CSSProperties = {
-    background: "#ffffff",
-    border: "1px solid #d8e4ea",
-    borderRadius: "12px",
-    padding: "14px",
+  const managePaymentButtonStyle = {
+    ...styles.actionButton,
+    ...styles.managePaymentButton,
+  };
+
+  const savePaymentButtonStyle = {
+    ...styles.savePaymentButton,
+    cursor: paymentSaving ? "not-allowed" : "pointer",
+    opacity: paymentSaving ? 0.7 : 1,
   };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        padding: "18px",
-        boxSizing: "border-box",
-        background:
-          "linear-gradient(145deg, #e8f8ee 0%, #8ad4a7 45%, #43a047 100%)",
-        fontFamily: "Segoe UI, Tahoma, Geneva, Verdana, sans-serif",
-      }}
-    >
-      <div style={cardStyle}>
-        <h1 style={{ margin: 0, color: "#0f3d1f", fontSize: "30px" }}>
-          Dashboard
-        </h1>
-        <p style={{ margin: "8px 0 0", color: "#1f2933" }}>
+    <div style={styles.pageContainer}>
+      <div style={styles.card}>
+        <h1 style={styles.title}>Dashboard</h1>
+
+        <p style={styles.subtitle}>
           {userName ? `Welcome, ${userName}` : "Welcome"}
         </p>
+
         {email && (
-          <p style={{ margin: "4px 0 0", color: "#475467", fontSize: "14px" }}>
+          <p style={styles.emailText}>
             Signed in as {email}
           </p>
         )}
 
         {loading && (
-          <p style={{ marginTop: "18px", color: "#334155" }}>Loading profile...</p>
+          <p style={styles.loadingText}>Loading profile...</p>
         )}
 
         {!loading && errorMessage && (
-          <p style={{ marginTop: "18px", color: "#b42318" }}>{errorMessage}</p>
+          <p style={styles.errorText}>{errorMessage}</p>
         )}
 
         {!loading && !errorMessage && stats && (
           <>
-            <div style={statGridStyle}>
-            <div style={statCardStyle}>
-              <p style={{ margin: "0 0 8px", color: "#475467", fontSize: "13px" }}>
-                Username
-              </p>
-              <p style={{ margin: 0, fontSize: "20px", fontWeight: 700, color: "#0f172a" }}>
-                {stats.userName}
-              </p>
+            <div style={styles.statGrid}>
+              <div style={styles.statCard}>
+                <p style={styles.statLabel}>Username</p>
+                <p style={styles.statValue}>{stats.userName}</p>
+              </div>
+
+              <div style={styles.statCard}>
+                <p style={styles.statLabel}>Wins</p>
+                <p style={styles.statValue}>{stats.wins}</p>
+              </div>
+
+              <div style={styles.statCard}>
+                <p style={styles.statLabel}>Level</p>
+                <p style={styles.statValue}>{stats.level}</p>
+              </div>
             </div>
 
-            <div style={statCardStyle}>
-              <p style={{ margin: "0 0 8px", color: "#475467", fontSize: "13px" }}>
-                Wins
-              </p>
-              <p style={{ margin: 0, fontSize: "20px", fontWeight: 700, color: "#0f172a" }}>
-                {stats.wins}
-              </p>
-            </div>
-
-            <div style={statCardStyle}>
-              <p style={{ margin: "0 0 8px", color: "#475467", fontSize: "13px" }}>
-                Level
-              </p>
-              <p style={{ margin: 0, fontSize: "20px", fontWeight: 700, color: "#0f172a" }}>
-                {stats.level}
-              </p>
-            </div>
-            </div>
-
-            <div
-              style={{
-                marginTop: "16px",
-                background: "#ffffff",
-                border: "1px solid #d8e4ea",
-                borderRadius: "12px",
-                padding: "16px",
-              }}
-            >
-              <p
-                style={{
-                  margin: "0 0 6px",
-                  color: "#475467",
-                  fontSize: "13px",
-                  fontWeight: 600,
-                }}
-              >
-                Funds Management
-              </p>
-              <p
-                style={{
-                  margin: "0 0 12px",
-                  fontSize: "24px",
-                  fontWeight: 700,
-                  color: "#0f172a",
-                }}
-              >
+            <div style={styles.fundsCard}>
+              <p style={styles.fundsLabel}>Funds Management</p>
+              <p style={styles.fundsBalance}>
                 Balance: ${fundsBalance.toFixed(2)}
               </p>
 
-              <div
-                style={{
-                  display: "flex",
-                  gap: "8px",
-                  flexWrap: "wrap",
-                  alignItems: "center",
-                }}
-              >
+              <div style={styles.actionRow}>
                 <button
                   type="button"
-                  onClick={() => {
+                  onClick={() =>
+                  {
                     console.log("Deposit clicked - implement callback");
                     // TODO: add deposit callback
                   }}
-                  style={{
-                    border: "none",
-                    borderRadius: "8px",
-                    padding: "9px 14px",
-                    fontSize: "14px",
-                    fontWeight: 700,
-                    color: "#ffffff",
-                    background: "#2e7d32",
-                    cursor: "pointer",
-                  }}
+                  style={depositButtonStyle}
                 >
                   Deposit
                 </button>
+
                 <button
                   type="button"
-                  onClick={() => {
+                  onClick={() =>
+                  {
                     console.log("Withdraw clicked - implement callback");
                     // TODO: add withdraw callback
                   }}
-                  style={{
-                    border: "none",
-                    borderRadius: "8px",
-                    padding: "9px 14px",
-                    fontSize: "14px",
-                    fontWeight: 700,
-                    color: "#ffffff",
-                    background: "#c62828",
-                    cursor: "pointer",
-                  }}
+                  style={withdrawButtonStyle}
                 >
                   Withdraw
                 </button>
+
                 <button
                   type="button"
                   onClick={() => setShowPaymentForm((prev) => !prev)}
-                  style={{
-                    border: "none",
-                    borderRadius: "8px",
-                    padding: "9px 14px",
-                    fontSize: "14px",
-                    fontWeight: 700,
-                    color: "#ffffff",
-                    background: "#1565c0",
-                    cursor: "pointer",
-                  }}
+                  style={managePaymentButtonStyle}
                 >
                   {showPaymentForm ? "Hide Payment Form" : "Manage Payment Info"}
                 </button>
               </div>
 
               {showPaymentForm && (
-                <form onSubmit={handlePaymentSubmit} style={{ marginTop: "14px" }}>
-                  <div
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-                      gap: "10px",
-                    }}
-                  >
+                <form onSubmit={handlePaymentSubmit} style={styles.paymentForm}>
+                  <div style={styles.paymentGrid}>
                     <input
                       type="text"
                       placeholder="Name on card"
@@ -358,13 +292,9 @@ function DashboardPanel() {
                           name: event.target.value,
                         }))
                       }
-                      style={{
-                        border: "1px solid #c8d2dc",
-                        borderRadius: "8px",
-                        padding: "9px 10px",
-                        fontSize: "14px",
-                      }}
+                      style={styles.paymentInput}
                     />
+
                     <input
                       type="text"
                       placeholder="Card number"
@@ -375,13 +305,9 @@ function DashboardPanel() {
                           cardNumber: event.target.value,
                         }))
                       }
-                      style={{
-                        border: "1px solid #c8d2dc",
-                        borderRadius: "8px",
-                        padding: "9px 10px",
-                        fontSize: "14px",
-                      }}
+                      style={styles.paymentInput}
                     />
+
                     <input
                       type="text"
                       placeholder="Expiry date (MM/YY)"
@@ -392,13 +318,9 @@ function DashboardPanel() {
                           expiryDate: event.target.value,
                         }))
                       }
-                      style={{
-                        border: "1px solid #c8d2dc",
-                        borderRadius: "8px",
-                        padding: "9px 10px",
-                        fontSize: "14px",
-                      }}
+                      style={styles.paymentInput}
                     />
+
                     <input
                       type="password"
                       placeholder="CVV"
@@ -409,13 +331,9 @@ function DashboardPanel() {
                           cvv: event.target.value,
                         }))
                       }
-                      style={{
-                        border: "1px solid #c8d2dc",
-                        borderRadius: "8px",
-                        padding: "9px 10px",
-                        fontSize: "14px",
-                      }}
+                      style={styles.paymentInput}
                     />
+
                     <input
                       type="text"
                       placeholder="Billing address"
@@ -426,36 +344,20 @@ function DashboardPanel() {
                           billingAddress: event.target.value,
                         }))
                       }
-                      style={{
-                        border: "1px solid #c8d2dc",
-                        borderRadius: "8px",
-                        padding: "9px 10px",
-                        fontSize: "14px",
-                      }}
+                      style={styles.paymentInput}
                     />
                   </div>
+
                   <button
                     type="submit"
                     disabled={paymentSaving}
-                    style={{
-                      marginTop: "10px",
-                      border: "none",
-                      borderRadius: "8px",
-                      padding: "9px 14px",
-                      fontSize: "14px",
-                      fontWeight: 700,
-                      color: "#ffffff",
-                      background: "#1f2937",
-                      cursor: paymentSaving ? "not-allowed" : "pointer",
-                      opacity: paymentSaving ? 0.7 : 1,
-                    }}
+                    style={savePaymentButtonStyle}
                   >
                     {paymentSaving ? "Saving..." : "Save Payment Info"}
                   </button>
+
                   {paymentMessage && (
-                    <p style={{ margin: "8px 0 0", color: "#334155", fontSize: "13px" }}>
-                      {paymentMessage}
-                    </p>
+                    <p style={styles.paymentMessage}>{paymentMessage}</p>
                   )}
                 </form>
               )}
@@ -467,7 +369,8 @@ function DashboardPanel() {
   );
 }
 
-export async function createDashboardView(container: HTMLElement) {
+export async function createDashboardView(container: HTMLElement)
+{
   container.innerHTML = "";
   const root = createRoot(container);
   root.render(<DashboardPanel />);
