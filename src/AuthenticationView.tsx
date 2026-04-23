@@ -1,12 +1,14 @@
 import { FormEvent, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { supabase } from "./main";
+import { authenticationStyles as styles } from "./AuthenticationViewStyles";
 
 export const AUTHENTICATION_VIEW_ID = "authentication-view-container";
 
 type AuthMode = "login" | "register";
 
-function AuthenticationForm() {
+function AuthenticationForm()
+{
   const [mode, setMode] = useState<AuthMode>("login");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
@@ -16,29 +18,42 @@ function AuthenticationForm() {
   const [errorMessage, setErrorMessage] = useState("");
 
   const isRegisterMode = mode === "register";
+  const loginButtonStyle =
+    mode === "login"
+      ? { ...styles.modeButton, ...styles.modeButtonActive }
+      : { ...styles.modeButton, ...styles.modeButtonInactive };
+  const registerButtonStyle =
+    mode === "register"
+      ? { ...styles.modeButton, ...styles.modeButtonActive }
+      : { ...styles.modeButton, ...styles.modeButtonInactive };
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>)
+  {
     event.preventDefault();
     setErrorMessage("");
 
-    if (!email.trim() || !password.trim()) {
+    if (!email.trim() || !password.trim())
+    {
       setErrorMessage("Email and password are required.");
       return;
     }
 
-    if (isRegisterMode && !username.trim()) {
+    if (isRegisterMode && !username.trim())
+    {
       setErrorMessage("Username is required.");
       return;
     }
 
-    if (isRegisterMode && password !== confirmPassword) {
+    if (isRegisterMode && password !== confirmPassword)
+    {
       setErrorMessage("Passwords do not match.");
       return;
     }
 
     setLoading(true);
 
-    if (isRegisterMode) {
+    if (isRegisterMode)
+    {
       const { error } = await supabase.auth.signUp({ email, password });
 
       if (error)
@@ -46,25 +61,33 @@ function AuthenticationForm() {
         setErrorMessage(error.message);
       }
 
-      try {
-        
-      const user =(await supabase.auth.getUser()).data.user;
-      if (user) 
+      try
       {
-        const uid = user.id;
-        await supabase.from('UserData').insert({uid: uid, userName: username, wins: 0, level: 1, funds: 0}).select();
+        const user = (await supabase.auth.getUser()).data.user;
+
+        if (user)
+        {
+          const uid = user.id;
+          await supabase
+            .from("UserData")
+            .insert({ uid, userName: username, wins: 0, level: 1, funds: 0 })
+            .select();
+        }
       }
-      } catch (e: any) {
+      catch (e: any)
+      {
         setErrorMessage(e.message);
       }
     }
-    else {
+    else
+    {
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
-      
-      if (error) {
+
+      if (error)
+      {
         setErrorMessage(error.message);
       }
     }
@@ -74,69 +97,26 @@ function AuthenticationForm() {
 
   return (
     <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        padding: "16px",
-        background:
-          "radial-gradient(circle at 20% 10%, #c2f0ff 0%, #70bdd7 35%, #1099bb 100%)",
-        boxSizing: "border-box",
-        fontFamily: "Segoe UI, Tahoma, Geneva, Verdana, sans-serif",
-      }}
+      style={styles.pageContainer}
     >
       <div
-        style={{
-          width: "100%",
-          maxWidth: "420px",
-          background: "#ffffff",
-          borderRadius: "14px",
-          boxShadow: "0 18px 40px rgba(0, 0, 0, 0.18)",
-          padding: "24px",
-          boxSizing: "border-box",
-        }}
+        style={styles.card}
       >
-        <h2 style={{ margin: "0 0 14px", color: "#10313b" }}>
+        <h2 style={styles.title}>
           {isRegisterMode ? "Create account" : "Welcome back"}
         </h2>
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "8px",
-            marginBottom: "18px",
-          }}
-        >
+        <div style={styles.modeToggleContainer}>
           <button
             type="button"
-            style={{
-              border: "1px solid #d0d7de",
-              borderRadius: "8px",
-              padding: "10px",
-              fontSize: "14px",
-              fontWeight: 600,
-              cursor: "pointer",
-              background: mode === "login" ? "#1099bb" : "#f4f7f9",
-              color: mode === "login" ? "#ffffff" : "#1f2933",
-            }}
+            style={loginButtonStyle}
             onClick={() => setMode("login")}
           >
             Login
           </button>
           <button
             type="button"
-            style={{
-              border: "1px solid #d0d7de",
-              borderRadius: "8px",
-              padding: "10px",
-              fontSize: "14px",
-              fontWeight: 600,
-              cursor: "pointer",
-              background: mode === "register" ? "#1099bb" : "#f4f7f9",
-              color: mode === "register" ? "#ffffff" : "#1f2933",
-            }}
+            style={registerButtonStyle}
             onClick={() => setMode("register")}
           >
             Register
@@ -146,30 +126,12 @@ function AuthenticationForm() {
         <form onSubmit={handleSubmit}>
           {isRegisterMode && (
             <>
-              <label
-                style={{
-                  display: "block",
-                  marginBottom: "6px",
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "#1f2933",
-                }}
-                htmlFor="auth-username"
-              >
+              <label style={styles.label} htmlFor="auth-username">
                 Username
               </label>
               <input
                 id="auth-username"
-                style={{
-                  width: "100%",
-                  boxSizing: "border-box",
-                  border: "1px solid #c8d2dc",
-                  borderRadius: "8px",
-                  padding: "10px 12px",
-                  marginBottom: "14px",
-                  fontSize: "14px",
-                  outlineColor: "#1099bb",
-                }}
+                style={styles.input}
                 type="text"
                 autoComplete="username"
                 value={username}
@@ -178,60 +140,24 @@ function AuthenticationForm() {
             </>
           )}
 
-          <label
-            style={{
-              display: "block",
-              marginBottom: "6px",
-              fontSize: "14px",
-              fontWeight: 600,
-              color: "#1f2933",
-            }}
-            htmlFor="auth-email"
-          >
+          <label style={styles.label} htmlFor="auth-email">
             Email
           </label>
           <input
             id="auth-email"
-            style={{
-              width: "100%",
-              boxSizing: "border-box",
-              border: "1px solid #c8d2dc",
-              borderRadius: "8px",
-              padding: "10px 12px",
-              marginBottom: "14px",
-              fontSize: "14px",
-              outlineColor: "#1099bb",
-            }}
+            style={styles.input}
             type="email"
             autoComplete="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
           />
 
-          <label
-            style={{
-              display: "block",
-              marginBottom: "6px",
-              fontSize: "14px",
-              fontWeight: 600,
-              color: "#1f2933",
-            }}
-            htmlFor="auth-password"
-          >
+          <label style={styles.label} htmlFor="auth-password">
             Password
           </label>
           <input
             id="auth-password"
-            style={{
-              width: "100%",
-              boxSizing: "border-box",
-              border: "1px solid #c8d2dc",
-              borderRadius: "8px",
-              padding: "10px 12px",
-              marginBottom: "14px",
-              fontSize: "14px",
-              outlineColor: "#1099bb",
-            }}
+            style={styles.input}
             type="password"
             autoComplete={isRegisterMode ? "new-password" : "current-password"}
             value={password}
@@ -240,30 +166,12 @@ function AuthenticationForm() {
 
           {isRegisterMode && (
             <>
-              <label
-                style={{
-                  display: "block",
-                  marginBottom: "6px",
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "#1f2933",
-                }}
-                htmlFor="auth-confirm-password"
-              >
+              <label style={styles.label} htmlFor="auth-confirm-password">
                 Confirm password
               </label>
               <input
                 id="auth-confirm-password"
-                style={{
-                  width: "100%",
-                  boxSizing: "border-box",
-                  border: "1px solid #c8d2dc",
-                  borderRadius: "8px",
-                  padding: "10px 12px",
-                  marginBottom: "14px",
-                  fontSize: "14px",
-                  outlineColor: "#1099bb",
-                }}
+                style={styles.input}
                 type="password"
                 autoComplete="new-password"
                 value={confirmPassword}
@@ -273,7 +181,7 @@ function AuthenticationForm() {
           )}
 
           {errorMessage && (
-            <p style={{ margin: "0 0 12px", color: "#b42318", fontSize: "13px" }}>
+            <p style={styles.errorMessage}>
               {errorMessage}
             </p>
           )}
@@ -281,14 +189,7 @@ function AuthenticationForm() {
           <button
             type="submit"
             style={{
-              width: "100%",
-              border: "none",
-              borderRadius: "8px",
-              padding: "12px",
-              fontSize: "15px",
-              fontWeight: 700,
-              background: "#1099bb",
-              color: "#ffffff",
+              ...styles.submitButton,
               cursor: loading ? "not-allowed" : "pointer",
               opacity: loading ? 0.7 : 1,
             }}
@@ -306,7 +207,8 @@ function AuthenticationForm() {
   );
 }
 
-export async function createAuthenticationView(container: HTMLElement) {
+export async function createAuthenticationView(container: HTMLElement)
+{
   container.innerHTML = "";
   const root = createRoot(container);
   root.render(<AuthenticationForm />);
